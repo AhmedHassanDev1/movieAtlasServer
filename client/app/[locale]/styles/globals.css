@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
+@layer components {
+  .cinematic-overlay {
+    background:
+      linear-gradient(to top,
+        rgb(10, 10, 10) 0%,
+        rgba(0, 0, 0, 0.5) 40%,
+        rgba(0, 0, 0, 0.2) 100%),
+      linear-gradient(to right,
+        rgb(10, 10, 10) 0%,
+        rgba(35, 0, 0, 0.26) 35%,
+        rgba(80, 0, 0, 0.156) 70%,
+        transparent 100%);
+  }
+  .glowEffect{
+    box-shadow: 0px 0px 5px 5px red;
+  }
+}

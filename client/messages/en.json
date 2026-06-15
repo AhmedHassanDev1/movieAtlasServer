@@ -1,0 +1,19 @@
+{
+    "global": {
+        "menu": "Menu",
+        "watchlist":"Watch List"
+    },
+    "button":{
+        "addToWatchList":"add WatchList",
+        "watchTrailer":"watch Trailer"
+    },
+    "user": {},
+    "title": {
+        "cast": "Cast",
+        "reviews": "Reviews",
+        "videos": "Videos",
+        "similarTitles": "Similar Titles",
+        "images": "Images",
+        "trending":"trending"
+    }
+}

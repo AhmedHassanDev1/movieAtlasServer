@@ -1,0 +1,306 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String         @id @default(uuid())
+  user_name String
+  email     String         @unique
+  password  String?
+  bio       String?
+  provider  Provider       @default(Local)
+  is_verify Boolean        @default(false)
+  avatar    Avatar?
+  reviews   Review[]
+  ratings   Rating[]
+  watchlist Watchlist[]
+  interests UserInterest[]
+}
+
+model Avatar {
+  url       String
+  public_id String?
+  user_id   String  @unique
+  user      User    @relation(fields: [user_id], references: [id])
+}
+
+model Title {
+  id String @id @default(uuid())
+
+  tmdb_id    Int
+  media_type MediaType
+
+  title             String
+  original_title    String?
+  original_language String?
+  overview          String?
+  tagline           String?
+  homepage          String?
+  imdb_id           String?
+
+  poster_path   String?
+  backdrop_path String?
+
+  popularity   Float
+  vote_average Float
+  vote_count   Int
+  adult        Boolean @default(false)
+
+  release_date DateTime?
+
+  runtime            Int?
+  status             String?
+  number_of_seasons  Int?
+  number_of_episodes Int?
+  in_production      Boolean?
+
+  genres         TitleGenre[]
+  credits        Credit[]
+  reviews        Review[]
+  videos         TitleVideo[]
+  images         TitleImage[]
+  watchlists     Watchlist[]
+  watchProviders TitleWatchProvider[]
+  ratings        Rating[]
+  discoverItem   DiscoverItem[]
+  collectionId   String?
+  collection     Collection?          @relation(fields: [collectionId], references: [id])
+
+  last_synced_at  DateTime?
+  tmdb_updated_at DateTime?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([tmdb_id, media_type])
+  @@index([popularity])
+  @@index([vote_average])
+  @@index([release_date])
+  @@index([last_synced_at])
+  @@index([imdb_id])
+}
+
+model DiscoverItem {
+  id Int @id @default(autoincrement())
+
+  type DiscoverType
+
+  rank Int
+
+  titleId String
+
+  title Title @relation(fields: [titleId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([type, rank])
+  @@index([type])
+}
+
+model TitleImage {
+  id           String    @id @default(uuid())
+  type         ImageType
+  file_path    String
+  url          String
+  width        Int?
+  height       Int?
+  aspect_ratio Float?
+  title_id     String
+  title        Title     @relation(fields: [title_id], references: [id], onDelete: Cascade)
+
+  @@index([title_id, type])
+}
+
+model TitleVideo {
+  id           String    @id @default(uuid())
+  url          String
+  name         String
+  size         Int?
+  site         VideoSite
+  published_at DateTime
+  title_id     String
+  title        Title     @relation(fields: [title_id], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id             String       @id @default(uuid())
+  tmdb_review_id String?      @unique
+  title_id       String
+  user_id        String?
+  source         ReviewSource
+  name           String?
+  avatar_path    String?
+  content        String
+  createdAt      DateTime     @default(now())
+  title          Title        @relation(fields: [title_id], references: [id], onDelete: Cascade)
+  user           User?        @relation(fields: [user_id], references: [id])
+}
+
+model Genre {
+  id            String         @id @default(uuid())
+  tmdb_id       Int            @unique
+  name          String
+  titleGenres   TitleGenre[]
+  userInterests UserInterest[]
+}
+
+model TitleGenre {
+  title_id String
+  genre_id Int
+
+  title Title @relation(fields: [title_id], references: [id], onDelete: Cascade)
+  genre Genre @relation(fields: [genre_id], references: [tmdb_id])
+
+  @@id([title_id, genre_id])
+}
+
+model Person {
+  id                   String    @id @default(uuid())
+  tmdb_id              Int       @unique
+  name                 String
+  biography            String?
+  birthday             DateTime?
+  popularity           Float
+  profile_path         String?
+  known_for_department String?
+  credits              Credit[]
+}
+
+model Credit {
+  id          String     @id @default(uuid())
+  title_id    String
+  person_id   String
+  credit_type CreditType
+  department  String
+  job         String
+  character   String?
+  order       Int?
+
+  title  Title  @relation(fields: [title_id], references: [id], onDelete: Cascade)
+  person Person @relation(fields: [person_id], references: [id])
+
+  @@unique([title_id, person_id, credit_type, job, character])
+}
+
+model Rating {
+  user_id  String
+  title_id String
+  value    Int
+
+  user  User  @relation(fields: [user_id], references: [id])
+  title Title @relation(fields: [title_id], references: [id])
+
+  @@id([user_id, title_id])
+}
+
+model Watchlist {
+  user_id  String
+  title_id String
+
+  user  User  @relation(fields: [user_id], references: [id])
+  title Title @relation(fields: [title_id], references: [id])
+
+  @@id([user_id, title_id])
+}
+
+model Collection {
+  id       String  @id @default(uuid())
+  tmdb_id  Int?    @unique
+  name     String
+  overview String?
+  titles   Title[]
+}
+
+model UserInterest {
+  user_id  String
+  genre_id String
+
+  user  User  @relation(fields: [user_id], references: [id])
+  genre Genre @relation(fields: [genre_id], references: [id])
+
+  @@id([user_id, genre_id])
+}
+
+model WatchProvider {
+  id        String               @id @default(uuid())
+  tmdb_id   Int                  @unique
+  name      String
+  logo_path String?
+  titles    TitleWatchProvider[]
+}
+
+model TitleWatchProvider {
+  title_id    String
+  provider_id String
+  region      String
+  type        WatchProviderType
+
+  title    Title         @relation(fields: [title_id], references: [id], onDelete: Cascade)
+  provider WatchProvider @relation(fields: [provider_id], references: [id])
+
+  @@id([title_id, provider_id, region, type])
+}
+
+model IngestionError {
+  id         String     @id @default(uuid())
+  title_id   String?
+  tmdb_id    Int?
+  media_type MediaType?
+  phase      String
+  message    String
+  stack      String?
+  created_at DateTime   @default(now())
+
+  @@index([phase, created_at])
+}
+
+enum ReviewSource {
+  TMDB
+  Local
+}
+
+enum Provider {
+  Local
+  Google
+  Apple
+}
+
+enum MediaType {
+  Movie
+  TV
+}
+
+enum VideoSite {
+  YouTube
+  Vimeo
+}
+
+enum ImageType {
+  Poster
+  Backdrop
+}
+
+enum CreditType {
+  Cast
+  Crew
+}
+
+enum WatchProviderType {
+  flatrate
+  rent
+  buy
+  free
+}
+
+enum DiscoverType {
+  TRENDING
+  POPULAR
+  TOP_RATED
+  NOW_PLAYING
+  UPCOMING
+  ACTION
+}

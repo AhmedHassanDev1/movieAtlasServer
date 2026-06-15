@@ -1,0 +1,26 @@
+import { Expose } from "class-transformer";
+
+
+export class AvatarDTO {
+    @Expose()
+    url: string
+
+    @Expose()
+    public_id: string
+}
+export class UserReponseDTO {
+    @Expose()
+    id: string
+
+    @Expose()
+    email: string
+
+    @Expose()
+    user_name: string
+
+    @Expose()
+    is_verify: boolean
+
+    @Expose()
+    avatar: AvatarDTO | null
+}
